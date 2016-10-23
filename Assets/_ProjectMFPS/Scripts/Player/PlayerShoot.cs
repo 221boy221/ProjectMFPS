@@ -8,8 +8,8 @@ public class PlayerShoot : MonoBehaviour {
     [SerializeField] private LayerMask _layerMask;
 	[SerializeField] private Camera _camera;
     // Weapon 
-    [SerializeField] private PlayerWeapon weapon;
-    [SerializeField] private GameObject weaponGFX;
+    [SerializeField] private PlayerWeapon equipedWeapon; // Replace with player equipment class
+    [SerializeField] private GameObject weaponGFX; // Model of equiped weapon... replace with ^
     [SerializeField] private string weaponLayerName = "Weapon";
 
     void Start() {
@@ -18,6 +18,7 @@ public class PlayerShoot : MonoBehaviour {
             this.enabled = false;
         }
 
+        // Give the weapon model the right layer name so that the raycast can ignore them
         weaponGFX.layer = LayerMask.NameToLayer(weaponLayerName);
         foreach (Transform child in weaponGFX.transform) {
             child.gameObject.layer = LayerMask.NameToLayer(weaponLayerName);
@@ -33,11 +34,11 @@ public class PlayerShoot : MonoBehaviour {
 
     private void Shoot() {
         RaycastHit hit;
-        if (Physics.Raycast(_camera.transform.position, _camera.transform.forward, out hit, weapon.range, _layerMask)) {
+        if (Physics.Raycast(_camera.transform.position, _camera.transform.forward, out hit, equipedWeapon.range, _layerMask)) {
             // Hit
             if (hit.collider.tag == PLAYER_TAG) {
                 // Sends the netID of the object we hit
-                CmdPlayerShot(hit.collider.name, weapon.damage);
+                CmdPlayerShot(hit.collider.name, equipedWeapon.damage);
             }
         }
     }
