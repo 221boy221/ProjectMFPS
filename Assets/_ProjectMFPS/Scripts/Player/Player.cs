@@ -5,15 +5,36 @@ using System.Collections;
 
 public class Player : MonoBehaviour {
 
-    [SerializeField] private Behaviour[] _disableOnDeath;
+    [SerializeField]
+    private Behaviour[] _disableOnDeath;
     private bool[] _wasEnabled;
 
     [SerializeField] private float _maxHealth = 100f;
-    private float _currentHealth;
+    private float m_Health;
     private bool _isDead = false;
+    
 
-    public bool IsDead { get { return _isDead; } protected set { _isDead = value; } }
+    private void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info) {
+        SerializeState(stream, info);
+    }
 
+    private void SerializeState(PhotonStream stream, PhotonMessageInfo info) {
+        if (stream.isWriting) {
+            stream.SendNext(m_Health);
+        }
+        else {
+            float oldHealth = m_Health;
+            m_Health = (float)stream.ReceiveNext();
+
+            if (m_Health != oldHealth) {
+                OnHealthChanged();
+            }
+        }
+    }
+
+    private void OnHealthChanged() {
+        throw new NotImplementedException();
+    }
 
     internal void Setup() {
         _wasEnabled = new bool[_disableOnDeath.Length];
@@ -26,7 +47,7 @@ public class Player : MonoBehaviour {
 
     internal void SetDefaults() {
         _isDead = false;
-        _currentHealth = _maxHealth;
+        m_Health = _maxHealth;
 
         // Re-enable all behaviours
         for (int i = 0; i < _disableOnDeath.Length; i++) {
@@ -43,11 +64,10 @@ public class Player : MonoBehaviour {
         if (_isDead)
             return;
 
-        _currentHealth -= dmg;
+        m_Health -= dmg;
 
-        if (_currentHealth <= 0)
+        if (m_Health <= 0)
             Die();
-        
     }
 
     private void Die() {
@@ -57,6 +77,7 @@ public class Player : MonoBehaviour {
         for (int i = 0; i < _disableOnDeath.Length; i++) {
             _disableOnDeath[i].enabled = false;
         }
+
         // Disable collider
         Collider col = GetComponent<Collider>();
         if (col != null)
@@ -66,12 +87,16 @@ public class Player : MonoBehaviour {
 
         // Call respawn method
         StartCoroutine(Respawn());
-
     }
 
     private IEnumerator Respawn() {
 
         Debug.Log(transform.name + " respawned.");
         yield break;
+    }
+
+    public bool IsDead {
+        get { return _isDead; }
+        protected set { _isDead = value; }
     }
 }

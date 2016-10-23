@@ -19,10 +19,10 @@ public class PlayerShoot : MonoBehaviour {
         }
 
         // Give the weapon model the right layer name so that the raycast can ignore them
-        weaponGFX.layer = LayerMask.NameToLayer(weaponLayerName);
-        foreach (Transform child in weaponGFX.transform) {
-            child.gameObject.layer = LayerMask.NameToLayer(weaponLayerName);
-        }
+        //weaponGFX.layer = LayerMask.NameToLayer(weaponLayerName);
+        //foreach (Transform child in weaponGFX.transform) {
+        //    child.gameObject.layer = LayerMask.NameToLayer(weaponLayerName);
+        //}
 
     }
 
