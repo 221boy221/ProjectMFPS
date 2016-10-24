@@ -5,6 +5,7 @@ using Photon;
 public class RoomManager : PunBehaviour {
 
     public static RoomManager Instance;
+    private string _roomName;
 
     void Awake() {
         if (Instance == null)
@@ -13,12 +14,16 @@ public class RoomManager : PunBehaviour {
             Destroy(this);
     }
 
-    public void CreateRoom(string roomName) {
-        PhotonNetwork.CreateRoom(roomName);
+    public void SetRoomName(string roomName) {
+        _roomName = roomName;
+    }
+
+    public void CreateRoom() {
+        PhotonNetwork.CreateRoom(_roomName);
     }
     
-    public void JoinRoom(string roomName) {
-        PhotonNetwork.JoinRoom(roomName);
+    public void JoinRoom() {
+        PhotonNetwork.JoinRoom(_roomName);
     }
 
     public override void OnJoinedRoom() {
