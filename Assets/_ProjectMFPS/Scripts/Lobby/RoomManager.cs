@@ -3,6 +3,8 @@ using System.Collections;
 using Photon;
 
 public class RoomManager : PunBehaviour {
+    public delegate void OnConnectedToRoomDelegate();
+    public static event OnConnectedToRoomDelegate OnConnectedToRoomHandler;
 
     public static RoomManager Instance;
     private string _roomName;
@@ -31,6 +33,13 @@ public class RoomManager : PunBehaviour {
     }
 
     public override void OnJoinedRoom() {
+        if (OnConnectedToRoomHandler == null) //if not filled in
+        {
+            PhotonNetwork.Disconnect();
+            return;
+        }
+
+        OnConnectedToRoomHandler();
         Debug.Log("Succesfully joined room!");
     }
     

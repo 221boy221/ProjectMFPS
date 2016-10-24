@@ -1,11 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Photon;
+using System;
 
-public class GameManager : MonoBehaviour {
-
+public class GameManager : PunBehaviour
+{
     public static GameManager Instance;
 
-	void Awake() {
+    void OnEnable()
+    {
+        RoomManager.OnConnectedToRoomHandler += InstantiatePlayer;
+    }
+
+    void Awake() {
         if (Instance == null)
             Instance = this;
         else
@@ -14,5 +21,15 @@ public class GameManager : MonoBehaviour {
 
     void OnGUI() {
         GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+    }
+
+    public void InstantiatePlayer()
+    {
+        PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
+    }
+
+    public override void OnPhotonPlayerConnected(PhotonPlayer other)
+    {
+        Debug.Log("Other player connected with ID:" + other.ID);
     }
 }
