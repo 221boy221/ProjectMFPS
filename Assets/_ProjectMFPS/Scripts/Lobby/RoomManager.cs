@@ -26,6 +26,10 @@ public class RoomManager : PunBehaviour {
         PhotonNetwork.JoinRoom(_roomName);
     }
 
+    public override void OnPhotonJoinRoomFailed(object[] codeAndMsg) {
+        Debug.Log("ERROR " + codeAndMsg[0] + " - " + codeAndMsg[1]);
+    }
+
     public override void OnJoinedRoom() {
         Debug.Log("Succesfully joined room!");
     }
