@@ -1069,7 +1069,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _movementSpeed: 5
   _mouseSensitivity: 3
-  _camera: {fileID: 0}
+  _camera: {fileID: 1171943980}
   _cameraRotationX: 0
 --- !u!114 &608017696
 MonoBehaviour:
@@ -1123,7 +1123,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 608017692}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -1149,11 +1149,12 @@ MonoBehaviour:
   synchronization: 3
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  ownershipTransfer: 0
+  ownershipTransfer: 1
   ObservedComponents:
   - {fileID: 608017696}
   - {fileID: 608017694}
   - {fileID: 608017693}
+  - {fileID: 608017699}
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 1
   instantiationId: 1
