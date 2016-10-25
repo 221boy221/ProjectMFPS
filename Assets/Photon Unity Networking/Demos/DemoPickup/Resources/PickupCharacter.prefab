@@ -171,8 +171,11 @@ MonoBehaviour:
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
   ownershipTransfer: 0
+  ObservedComponents: []
+  ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1
+  isRuntimeInstantiated: 0
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1

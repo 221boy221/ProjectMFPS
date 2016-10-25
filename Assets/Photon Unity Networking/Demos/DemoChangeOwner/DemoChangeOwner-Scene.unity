@@ -663,8 +663,11 @@ MonoBehaviour:
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
   ownershipTransfer: 1
+  ObservedComponents: []
+  ObservedComponentsFoldoutOpen: 1
   viewIdField: 1
   instantiationId: 1
+  isRuntimeInstantiated: 0
 --- !u!23 &1245954008
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -743,7 +746,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PointerPrefab: {fileID: 100000, guid: 9c6977a9ecda14e4e96ea3a71c749c2c, type: 2}
   Offset: 0.5
-  markerTransform: {fileID: 0}
 --- !u!1 &1277725633
 GameObject:
   m_ObjectHideFlags: 0
@@ -1235,8 +1237,11 @@ MonoBehaviour:
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
   ownershipTransfer: 0
+  ObservedComponents: []
+  ObservedComponentsFoldoutOpen: 1
   viewIdField: 2
   instantiationId: 2
+  isRuntimeInstantiated: 0
 --- !u!1 &1799231921
 GameObject:
   m_ObjectHideFlags: 0

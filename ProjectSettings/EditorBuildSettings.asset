@@ -6,6 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Photon Unity Networking/_Tests/PlayersList_UI/PlayerList_UI.unity
+  - enabled: 1
     path: Assets/Photon Unity Networking/Demos/DemoHub/DemoHub-Scene.unity
   - enabled: 1
     path: Assets/Photon Unity Networking/Demos/Demo2DJumpAndRunWithPhysics/Demo2DJumpAndRunWithPhysics-Scene.unity

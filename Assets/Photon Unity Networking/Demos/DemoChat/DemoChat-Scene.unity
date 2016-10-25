@@ -133,8 +133,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ChatAppId: 
   ChannelsToJoinOnConnect:
-  - 526567696f6e
-  - 4775696c64
+  - Region
+  - Guild
   HistoryLengthToFetch: 0
   ChatPanel: {fileID: 1507568401}
   InputFieldChat: {fileID: 1984687306}
