@@ -3,6 +3,16 @@ using System.Collections;
 using Photon;
 using System;
 
+public enum GameState {
+    None,
+    Startup,
+    MainMenu,
+    Lobby,
+    WaitingRoom,
+    Inventory,
+    InGame    
+}
+
 public class GameManager : PunBehaviour
 {
     public static GameManager Instance;
