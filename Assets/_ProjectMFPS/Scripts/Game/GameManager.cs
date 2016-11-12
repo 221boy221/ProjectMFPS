@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Photon;
-using System;
+using UnityEngine.Events;
 
 public enum GameState {
     None,
@@ -13,24 +13,31 @@ public enum GameState {
     InGame    
 }
 
-public class GameManager : PunBehaviour
-{
-    public static GameManager Instance;
+public class GameManager : PunBehaviour {
 
-    void OnEnable()
-    {
-        RoomManager.OnConnectedToRoomHandler += InstantiatePlayer;
-    }
+    public static GameManager Instance;
+    public UnityAction InitializeGame;
+    public UnityAction LoadedGame;
 
     void Awake() {
         if (Instance == null)
             Instance = this;
         else
             Destroy(this);
+
+        StartCoroutine(InitGame());
     }
 
-    void OnGUI() {
-        GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
+    private IEnumerator InitGame() {
+        InitializeGame();
+
+        yield break;
+    }
+
+
+    void OnEnable()
+    {
+        RoomManager.OnConnectedToRoomHandler += InstantiatePlayer;
     }
 
     public void InstantiatePlayer()

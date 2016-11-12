@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class Panel : MonoBehaviour {
+public class OverlayPopup : MonoBehaviour {
 
     // Header
     private Text _headerText;

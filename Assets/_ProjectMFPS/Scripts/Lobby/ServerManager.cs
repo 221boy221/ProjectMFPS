@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Photon;
-using System.Collections.Generic;
+using UnityEngine.Events;
 
 public class ServerManager : PunBehaviour {
 
     public static ServerManager Instance;
+    public UnityAction ConnectedToServer;
 
     [SerializeField]
     private ServerList _serverList;
@@ -24,7 +25,7 @@ public class ServerManager : PunBehaviour {
     /// <summary>Called by Unity when the application is closed. Tries to disconnect.</summary>
     protected void OnApplicationQuit() {
         PhotonNetwork.Disconnect();
-    }
+    }   
 
     void OnGUI() {
         GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
@@ -67,9 +68,9 @@ public class ServerManager : PunBehaviour {
 
     public IEnumerator RefreshServerList() {
         // Get list of Available Regions
-       // Debug.Log("Getting list of available regions...");
-        //yield return new WaitUntil(() => PhotonNetwork.networkingPeer.OpGetRegions(PhotonNetwork.networkingPeer.AppId) == true);
-       // Debug.Log("Done.");
+        // Debug.Log("Getting list of available regions...");
+        // yield return new WaitUntil(() => PhotonNetwork.networkingPeer.OpGetRegions(PhotonNetwork.networkingPeer.AppId) == true);
+        // Debug.Log("Done.");
         Debug.Log("Pinging available regions...");
         yield return PhotonHandler.SP.PingAvailableRegionsCoroutine(false);
         Debug.Log("Done.");
@@ -95,6 +96,8 @@ public class ServerManager : PunBehaviour {
     public override void OnConnectedToMaster() {
         base.OnConnectedToMaster();
         Debug.Log("Connected to the Master Server on Region '" + _activeRegion.ToString() + "'.\nReady to join a Lobby.");
+
+        ConnectedToServer();
     } 
 
 }
