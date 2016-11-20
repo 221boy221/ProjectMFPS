@@ -16,37 +16,46 @@ public enum GameState {
 public class GameManager : PunBehaviour {
 
     public static GameManager Instance;
-    public UnityAction InitializeGame;
-    public UnityAction LoadedGame;
+    public static UnityAction InitializeGame = delegate { };
+    public static UnityAction LoadedGame = delegate { };
 
     void Awake() {
         if (Instance == null)
             Instance = this;
         else
             Destroy(this);
+    }
 
+    void Start()
+    {
         StartCoroutine(InitGame());
     }
 
     private IEnumerator InitGame() {
+        Debug.Log("InitGame");
         InitializeGame();
+
+        // fake loading, Todo!
+        yield return new WaitForSeconds(2f);
+        Debug.Log("LoadedGame");
+        LoadedGame();
 
         yield break;
     }
 
+    //void OnEnable()
+    //{
+    //    RoomManager.OnConnectedToRoomHandler += InstantiatePlayer;
+    //}
 
-    void OnEnable()
-    {
-        RoomManager.OnConnectedToRoomHandler += InstantiatePlayer;
-    }
+    //public void InstantiatePlayer()
+    //{
+    //    PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
+    //}
 
-    public void InstantiatePlayer()
-    {
-        PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
-    }
+    //public override void OnPhotonPlayerConnected(PhotonPlayer other)
+    //{
+    //    Debug.Log("Other player connected with ID:" + other.ID);
+    //}
 
-    public override void OnPhotonPlayerConnected(PhotonPlayer other)
-    {
-        Debug.Log("Other player connected with ID:" + other.ID);
-    }
 }

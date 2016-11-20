@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.Events;
 
 public enum ScreenPanel {
+    None = 0,
     LoadingGame,
     MainMenu,
     Lobby,
@@ -11,20 +12,15 @@ public enum ScreenPanel {
 }
 
 public class UIManager : MonoBehaviour {
-
-    public static ScreenPanel UiState;
-    public static UnityAction SwitchState;
-
-    [SerializeField] private UIPanel _loadingGameScreen;
-    [SerializeField] private UIPanel _mainMenu; // todo: make uipanelhandler for mainmenu that contains all sub-panels?
-    [SerializeField] private UIPanel _lobbyScreen;
-    [SerializeField] private UIPanel _loadingMatchScreen;
-    [SerializeField] private UIPanel _inventoryScreen;
-
+    
+    public static UnityAction<ScreenPanel> SwitchUIPanel = delegate { };
+    
+    [SerializeField] private GameObject _loadingGameScreen;
+    [SerializeField] private ScreenPanel _currentScreenPanel;
 
     void Awake() {
         // entry
-        GameManager.Instance.InitializeGame += OnStartGame;
+        GameManager.InitializeGame += OnStartGame;
     }
 
     // -------------------- //
@@ -40,11 +36,13 @@ public class UIManager : MonoBehaviour {
     // ------------------------------- //
     // -- Enabling/Disabling panels -- //
     // ------------------------------- //
-    private IEnumerator OpenPanel(ScreenPanel panel) {
+    private IEnumerator OpenPanel(ScreenPanel panel)
+    {
+        Debug.Log("OpenPanel:" + panel);
 
         switch (panel) {
             case ScreenPanel.LoadingGame:
-                yield return StartCoroutine(OpenLoadngGame());
+                yield return StartCoroutine(OpenLoadingGame());
                 break;
             case ScreenPanel.MainMenu:
                 yield return StartCoroutine(OpenMainMenu());
@@ -61,40 +59,43 @@ public class UIManager : MonoBehaviour {
             default:
                 break;
         }
-
         // On Done Animating
         //todo: Event OnDoneAnimatingTowards(panel);
-        UiState = panel;
-        SwitchState();
+        _currentScreenPanel = panel;
+        SwitchUIPanel(panel);
         yield break;
     }
 
 
-    private IEnumerator OpenLoadngGame() {
-        // -
+    private IEnumerator OpenLoadingGame() {
+        // Enable
         _loadingGameScreen.gameObject.SetActive(true);
 
         // Remove EventListeners
-        GameManager.Instance.InitializeGame -= OnStartGame;
+        GameManager.InitializeGame -= OnStartGame;
         // Add EventListeners
-        GameManager.Instance.LoadedGame += OnLoadedGame;
+        GameManager.LoadedGame += OnLoadedGame;
         yield break;
     }
 
     private IEnumerator OpenMainMenu() {
-        // -
-        _mainMenu.gameObject.SetActive(true);
+        // Disable
+        _loadingGameScreen.gameObject.SetActive(false);
+        // Enable
+        //_mainMenu.gameObject.SetActive(true);
 
         // Remove EventListeners
-        GameManager.Instance.LoadedGame -= OnLoadedGame;
+        GameManager.LoadedGame -= OnLoadedGame;
         // Add EventListeners
         ServerManager.Instance.ConnectedToServer += OnConnectedToServer;
         yield break;
     }
 
     private IEnumerator OpenLobby() {
-        // -
-        _lobbyScreen.gameObject.SetActive(true);
+        // Disable
+        //_mainMenu.gameObject.SetActive(false);
+        // Enable
+        //_lobbyScreen.gameObject.SetActive(true);
 
         // Remove EventListeners
         ServerManager.Instance.ConnectedToServer -= OnConnectedToServer;
@@ -105,13 +106,13 @@ public class UIManager : MonoBehaviour {
 
     private IEnumerator OpenLoadingMatch() {
         // -
-        _loadingMatchScreen.gameObject.SetActive(true);
+        //_loadingMatchScreen.gameObject.SetActive(true);
         yield break;
     }
 
     private IEnumerator OpenInventory() {
         // -
-        _inventoryScreen.gameObject.SetActive(true);
+        //_inventoryScreen.gameObject.SetActive(true);
         yield break;
     }
 

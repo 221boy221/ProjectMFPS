@@ -1,28 +1,24 @@
 ﻿using UnityEngine;
 
-public class UIPanel : MonoBehaviour {
+public abstract class UIPanel : MonoBehaviour {
 
-    void Awake () {
-        UIManager.SwitchState += OnUiSwitchState;
-    }
-
-    void Start() {
+    void Start()
+    {
+        UIManager.SwitchUIPanel += OnSwitchUIPanel;
+        
         // todo: replace with UIManager calling inits of all panels
         InitReferences();
     }
 
-    void OnDestroy() {
-
-    }
+    //void OnEnable() { UIManager.SwitchUIPanel += OnSwitchUIPanel; }
+    void OnDisable() { UIManager.SwitchUIPanel -= OnSwitchUIPanel; }
+    void OnDestroy() { UIManager.SwitchUIPanel -= OnSwitchUIPanel; }
 
     // EventHandler
-    private void OnUiSwitchState() {
-        UpdateLayout();
-    }
+    internal abstract void OnSwitchUIPanel(ScreenPanel panel);
 
     // Override me
     internal virtual void InitReferences() { }
-    internal virtual void UpdateLayout() { }
     internal virtual void Destroy() { }
 
 }

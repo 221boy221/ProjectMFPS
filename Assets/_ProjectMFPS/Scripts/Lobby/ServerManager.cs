@@ -6,7 +6,7 @@ using UnityEngine.Events;
 public class ServerManager : PunBehaviour {
 
     public static ServerManager Instance;
-    public UnityAction ConnectedToServer;
+    public UnityAction ConnectedToServer = delegate { };
 
     [SerializeField]
     private ServerList _serverList;
@@ -46,7 +46,6 @@ public class ServerManager : PunBehaviour {
         yield return new WaitUntil(() => PhotonNetwork.networkingPeer.ConnectToNameServer() == true);
         yield return new WaitUntil(() => PhotonNetwork.networkingPeer.State == ClientState.ConnectedToNameServer);
         Debug.Log("> Connection Established!");
-        StartCoroutine(RefreshServerList());
         yield break;
     }
 
@@ -60,11 +59,16 @@ public class ServerManager : PunBehaviour {
         base.OnConnectionFail(cause);
         Debug.LogError(cause);
     }
+
     public override void OnFailedToConnectToPhoton(DisconnectCause cause) {
         base.OnFailedToConnectToPhoton(cause);
         Debug.LogError(cause);
     }
     
+    public void OnLoggedIn()
+    {
+        StartCoroutine(RefreshServerList());
+    }
 
     public IEnumerator RefreshServerList() {
         // Get list of Available Regions
