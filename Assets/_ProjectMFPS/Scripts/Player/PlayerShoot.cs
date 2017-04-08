@@ -1,52 +1,71 @@
-﻿using System;
+﻿using System.Collections;
 using UnityEngine;
 
-public class PlayerShoot : MonoBehaviour {
+public class PlayerShoot : MonoBehaviour
+{
+    #region Vars
 
-    private const string PLAYER_TAG = "Player";
+    [SerializeField]
+    private float _shootInterval = 1f;
 
-    [SerializeField] private LayerMask _layerMask;
-	[SerializeField] private Camera _camera;
-    // Weapon 
-    [SerializeField] private PlayerWeapon equipedWeapon; // Replace with player equipment class
-    [SerializeField] private GameObject weaponGFX; // Model of equiped weapon... replace with ^
-    [SerializeField] private string weaponLayerName = "Weapon";
+    [SerializeField]
+    private GameObject _bulletPrefab;
 
-    void Start() {
-        if(_camera == null) {
-            Debug.Log("PlayerShoot: No camera referenced!");
-            this.enabled = false;
-        }
+    [SerializeField]
+    private Transform _bulletSpawn;
 
-        // Give the weapon model the right layer name so that the raycast can ignore them
-        //weaponGFX.layer = LayerMask.NameToLayer(weaponLayerName);
-        //foreach (Transform child in weaponGFX.transform) {
-        //    child.gameObject.layer = LayerMask.NameToLayer(weaponLayerName);
-        //}
+    private bool _canShoot = true;
+    private bool _shootDown = false;
 
+    #endregion
+
+    #region Methods
+
+    private void Start()
+    {
+        InputHandler.Instance.OnInteractionDown += ShootDown;
+        InputHandler.Instance.OnInteractionUp += ShootUp;
     }
 
-    void Update() {
-        if (Input.GetButtonDown("Fire1")) {
+    public void OnDestroy()
+    {
+        InputHandler.Instance.OnInteractionDown -= ShootDown;
+        InputHandler.Instance.OnInteractionUp -= ShootUp;
+    }
+
+    private void ShootDown()
+    {
+        _shootDown = true;
+        Shoot();
+    }
+
+    private void ShootUp()
+    {
+        _shootDown = false;
+    }
+
+    private void Shoot()
+    {
+        if (!_canShoot)
+        {
+            return;
+        }
+        _canShoot = false;
+        StartCoroutine(ShootCooldown());
+        GameObject bullet = PhotonNetwork.Instantiate(_bulletPrefab.name, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0), 0);
+        bullet.transform.position = _bulletSpawn.position;
+        bullet.transform.rotation = _bulletSpawn.rotation;
+    }
+
+    private IEnumerator ShootCooldown()
+    {
+        yield return new WaitForSeconds(_shootInterval);
+        _canShoot = true;
+        if (_shootDown)
+        {
             Shoot();
         }
     }
 
-    private void Shoot() {
-        RaycastHit hit;
-        if (Physics.Raycast(_camera.transform.position, _camera.transform.forward, out hit, equipedWeapon.range, _layerMask)) {
-            // Hit
-            if (hit.collider.tag == PLAYER_TAG) {
-                // Sends the netID of the object we hit
-                CmdPlayerShot(hit.collider.name, equipedWeapon.damage);
-            }
-        }
-    }
-
-    void CmdPlayerShot(string playerID, float damage) {
-        Debug.Log(playerID + " has been shot.");
-
-        //Player player = GameManager.GetPlayer(playerID);
-        //player.RpcTakeDamage(damage);
-    }
+    #endregion
 }

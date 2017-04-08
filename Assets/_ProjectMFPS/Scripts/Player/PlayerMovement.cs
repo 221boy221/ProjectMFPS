@@ -1,122 +1,133 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : MonoBehaviour {
-    //Movement
-    [SerializeField] private float _movementSpeed = 5f;
-    [SerializeField] private float _mouseSensitivity = 3f;
-    private Vector3 _velocity = Vector3.zero;
-    private Vector3 _rotation = Vector3.zero;
-    private Rigidbody _rb;
-    //Camera
-    [SerializeField] private Camera _camera;
-    [SerializeField] private float _cameraRotationX = 0f;
-    private float _camRotLimit = 85f;
-    private float _currentCamRotX = 0f;
-    //Networking
-    private PhotonView _photonView;
-    private Vector3 m_NetworkPosition;
-    private Quaternion m_NetworkRotation;
-    private float m_MovementSpeed;
-    private double m_LastNetworkDataReceivedTime;
+public class PlayerMovement : MonoBehaviour
+{
+    #region Vars
 
-    void Start() {
-        _rb = GetComponent<Rigidbody>();
-        _photonView = GetComponent<PhotonView>();
+    [SerializeField]
+    private PlayerAnimator _animator;
+    [SerializeField]
+    private float _speed = 5f;
+    [SerializeField]
+    private float _climbSpeed = 5f;
+    [SerializeField]
+    private float _jumpForce = 5f;
+    [SerializeField]
+    private Rigidbody2D _rigid;
+
+    private bool _isClimbing = false;
+    private int _groundTouching = 0;
+    private Vector2 _targetDirection;
+    private int _groundLayer;
+    private int _ladderLayer;
+
+    #endregion
+
+    #region Methods
+
+    public void Start()
+    {
+        _targetDirection = Vector2.zero;
+        _groundLayer = LayerMask.NameToLayer(Layers.Ground);
+        _ladderLayer = LayerMask.NameToLayer(Layers.Ladder);
+        InputHandler.Instance.OnDirectionChanged += OnDirectionChanged;
+        InputHandler.Instance.OnJumpClicked += Jump;
     }
 
-    internal void SerializeState(PhotonStream stream, PhotonMessageInfo info) {
-        if (stream.isWriting) {
-            stream.SendNext(_rb.position);
-            stream.SendNext(_rb.rotation);
-            stream.SendNext(m_MovementSpeed);
-        } else {
-            m_NetworkPosition = (Vector3)stream.ReceiveNext();
-            m_NetworkRotation = (Quaternion)stream.ReceiveNext();
-            m_MovementSpeed = (float)stream.ReceiveNext();
+    private void FixedUpdate()
+    {
+        Vector2 velo = _rigid.velocity;
+        if (_targetDirection != null)
+        {
+            velo.x = _targetDirection.x * _speed;
+            if (_isClimbing)
+            {
+                velo.y = _targetDirection.y * _climbSpeed;
+            }
+            _rigid.velocity = velo;
+        }
 
-            m_LastNetworkDataReceivedTime = info.timestamp;
+        bool moving = velo.x != 0f;
+        if (moving)
+        {
+            float direction = velo.x / Mathf.Abs(velo.x);
+            if (direction != transform.localScale.x)
+            {
+                transform.localScale = new Vector3(direction, 1f, 1f);
+            }
+        }
+        _animator.IsMoving = moving;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == _groundLayer)
+        {
+            if (_groundTouching == 0)
+            {
+                _animator.Land();
+            }
+            _groundTouching++;
         }
     }
 
-    void Update() {
-        if (_photonView.isMine) {
-            CalcPosition();
-            CalcRotation();
-        } else {
-            CalcNetworkedPosition();
-            CalcNetworkedRotation();
-        }
-
-        UpdatePosition();
-        UpdateRotation();
-    }
-
-    private void CalcNetworkedPosition() {
-        float pingInSeconds = (float)PhotonNetwork.GetPing() * 0.001f;
-        float timeSinceLastUpdate = (float)(PhotonNetwork.time - m_LastNetworkDataReceivedTime);
-        float totalTimePassed = pingInSeconds + timeSinceLastUpdate;
-
-        Vector3 exterpolatedTargetPosition = m_NetworkPosition + _velocity * totalTimePassed;
-        Vector3 newVelocity = (exterpolatedTargetPosition - m_NetworkPosition).normalized * m_MovementSpeed;
-        //Vector3 newPosition = Vector3.MoveTowards(_rb.position, exterpolatedTargetPosition, m_Speed * Time.deltaTime);
-
-
-        if (Vector3.Distance(transform.position, exterpolatedTargetPosition) > 1f) {
-            _velocity = newVelocity;
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == _groundLayer)
+        {
+            _groundTouching--;
         }
     }
 
-    private void CalcNetworkedRotation() {
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, m_NetworkRotation, 180f * Time.deltaTime);
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!_isClimbing && collision.gameObject.layer == _ladderLayer && _rigid.velocity.y < 0f)
+        {
+            isClimbing = true;
+        }
     }
 
-    internal void CalcPosition() {
-        // Calculate movement velocity as a 3D Vector
-        float xMov = Input.GetAxisRaw("Horizontal");
-        float zMov = Input.GetAxisRaw("Vertical");
-
-        Vector3 mHorizontal = transform.right * xMov;
-        Vector3 mVertical = transform.forward * zMov;
-        Vector3 velocity = (mHorizontal + mVertical).normalized * _movementSpeed;
-
-        _velocity = velocity;
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.gameObject.layer == _ladderLayer)
+        {
+            isClimbing = false;
+        }
     }
 
-    internal void CalcRotation() {
-        // Calc X rotation
-        float yRot = Input.GetAxisRaw("Mouse X");
-        Vector3 rotation = new Vector3(0f, yRot, 0f) * _mouseSensitivity;
-        _rotation = rotation;
-
-        // Calc Y rotation
-        float xRot = Input.GetAxisRaw("Mouse Y");
-        float cameraRotationX = xRot * _mouseSensitivity;
-        _cameraRotationX = cameraRotationX;
+    private void OnDirectionChanged(Vector2 direction)
+    {
+        _targetDirection = direction;
     }
-    
 
-    // Movement
-    private void UpdatePosition() {
-        if (_velocity == Vector3.zero)
+    public void Jump()
+    {
+        if (_isClimbing || _groundTouching < 1)
+        {
             return;
-
-        _rb.MovePosition(_rb.position + _velocity * Time.fixedDeltaTime);
+        }
+        Vector2 velo = _rigid.velocity;
+        velo.y = _jumpForce;
+        _rigid.velocity = velo;
+        _animator.Jump();
     }
 
-    // Rotation
-    private void UpdateRotation() {
-        // Updates PlayerModel X,Y,Z rotation
-        _rb.MoveRotation(_rb.rotation * Quaternion.Euler(_rotation));
+    #endregion
 
-        // Updates Camera X rotation
-        if (_camera != null) {
-            // Set rotation and clamp it
-            _currentCamRotX -= _cameraRotationX;
-            _currentCamRotX = Mathf.Clamp(_currentCamRotX, -_camRotLimit, _camRotLimit);
-            // Apply rotation to camera transform
-            _camera.transform.localEulerAngles = new Vector3(_currentCamRotX, 0f, 0f);
+    #region Properties
+
+    private bool isClimbing
+    {
+        set
+        {
+            _rigid.gravityScale = value ? 0f : 1f;
+            _isClimbing = value;
+            if (_isClimbing && _groundTouching == 0)
+            {
+                _animator.Land();
+            }
         }
     }
 
+    #endregion
 }

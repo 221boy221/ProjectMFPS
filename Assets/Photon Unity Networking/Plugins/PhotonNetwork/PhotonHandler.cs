@@ -97,7 +97,7 @@ internal class PhotonHandler : MonoBehaviour
     /// </summary>
     /// <remarks>
     /// Sets a disconnect timer when PhotonNetwork.BackgroundTimeout > 0.1f. See PhotonNetwork.BackgroundTimeout.
-    /// 
+    ///
     /// Some versions of Unity will give false values for pause on Android (and possibly on other platforms).
     /// </remarks>
     /// <param name="pause">If the app pauses.</param>
@@ -215,7 +215,7 @@ internal class PhotonHandler : MonoBehaviour
     /// <summary>A thread which runs independent from the Update() calls. Keeps connections online while loading or in background. See PhotonNetwork.BackgroundTimeout.</summary>
     public static bool FallbackSendAckThread()
     {
-        if (sendThreadShouldRun && PhotonNetwork.networkingPeer != null)
+        if (sendThreadShouldRun && !PhotonNetwork.offlineMode && PhotonNetwork.networkingPeer != null)
         {
             // check if the client should disconnect after some seconds in background
             if (timerToStopConnectionInBackground != null && PhotonNetwork.BackgroundTimeout > 0.1f)

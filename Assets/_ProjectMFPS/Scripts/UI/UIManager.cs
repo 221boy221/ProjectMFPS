@@ -1,119 +1,87 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
-public enum ScreenPanel {
-    None = 0,
-    LoadingGame,
-    MainMenu,
-    Lobby,
-    Inventory,
-    LoadingMatch
-}
+public class UIManager : MonoBehaviour
+{
 
-public class UIManager : MonoBehaviour {
+    #region Vars
+    [SerializeField] private UIPanel[] _UIPanels;
+    #endregion
     
-    public static UnityAction<ScreenPanel> SwitchUIPanel = delegate { };
-    
-    [SerializeField] private GameObject _loadingGameScreen;
-    [SerializeField] private ScreenPanel _currentScreenPanel;
-
-    void Awake() {
-        // entry
-        GameManager.InitializeGame += OnStartGame;
-    }
-
-    // -------------------- //
-    // -- Event Handlers -- //
-    // -------------------- //
-    private void OnStartGame()          { StartCoroutine(OpenPanel(ScreenPanel.LoadingGame)); }
-    private void OnLoadedGame()         { StartCoroutine(OpenPanel(ScreenPanel.MainMenu)); }
-    private void OnConnectedToServer()  { StartCoroutine(OpenPanel(ScreenPanel.Lobby)); }
-    private void OnJoiningMatch()       { StartCoroutine(OpenPanel(ScreenPanel.LoadingMatch)); }
-    private void OnOpenInventory()      { StartCoroutine(OpenPanel(ScreenPanel.Inventory)); }
-
-
-    // ------------------------------- //
-    // -- Enabling/Disabling panels -- //
-    // ------------------------------- //
-    private IEnumerator OpenPanel(ScreenPanel panel)
+    #region Methods
+    private void Awake()
     {
-        Debug.Log("OpenPanel:" + panel);
+        // Entry
+        AddEventListeners();
+    }
 
-        switch (panel) {
-            case ScreenPanel.LoadingGame:
-                yield return StartCoroutine(OpenLoadingGame());
-                break;
-            case ScreenPanel.MainMenu:
-                yield return StartCoroutine(OpenMainMenu());
-                break;
-            case ScreenPanel.Lobby:
-                yield return StartCoroutine(OpenLobby());
-                break;
-            case ScreenPanel.LoadingMatch:
-                yield return StartCoroutine(OpenLoadingMatch());
-                break;
-            case ScreenPanel.Inventory:
-                yield return StartCoroutine(OpenInventory());
-                break;
-            default:
-                break;
+    private void OnEnable()
+    {
+        // Check if the Player is already connected to a Room.
+        if (!PhotonNetwork.inRoom)
+        {
+            SwitchPanelTo(UIPanelTypes.MainMenu);
         }
-        // On Done Animating
-        //todo: Event OnDoneAnimatingTowards(panel);
-        _currentScreenPanel = panel;
-        SwitchUIPanel(panel);
-        yield break;
+        else
+        {
+            ReconnectWithWaitingRoom();
+        }
     }
 
-
-    private IEnumerator OpenLoadingGame() {
-        // Enable
-        _loadingGameScreen.gameObject.SetActive(true);
-
-        // Remove EventListeners
-        GameManager.InitializeGame -= OnStartGame;
-        // Add EventListeners
-        GameManager.LoadedGame += OnLoadedGame;
-        yield break;
+    /// <summary>
+    /// Switches the UI Panel back towards the Waiting Room since the client is already connected, thus skipping the Join/Host panel.
+    /// </summary>
+    private void ReconnectWithWaitingRoom()
+    {
+        NetworkManager.Instance.SetDefaultPlayerProperties(false); // Todo: check if necessary
+        SwitchPanelTo(UIPanelTypes.WaitingRoom);
     }
 
-    private IEnumerator OpenMainMenu() {
-        // Disable
-        _loadingGameScreen.gameObject.SetActive(false);
-        // Enable
-        //_mainMenu.gameObject.SetActive(true);
+    // Event Listeners //
+    private void AddEventListeners()
+    {
+        for (int i = 0; i < _UIPanels.Length; i++)
+        {
+            _UIPanels[i].OpenUIPanelEvent += SwitchPanelTo;
+        }
 
-        // Remove EventListeners
-        GameManager.LoadedGame -= OnLoadedGame;
-        // Add EventListeners
-        ServerManager.Instance.ConnectedToServer += OnConnectedToServer;
-        yield break;
+        ServerManager.Instance.OnConnectedToServer += OnConnectedToServer;
     }
 
-    private IEnumerator OpenLobby() {
-        // Disable
-        //_mainMenu.gameObject.SetActive(false);
-        // Enable
-        //_lobbyScreen.gameObject.SetActive(true);
-
-        // Remove EventListeners
-        ServerManager.Instance.ConnectedToServer -= OnConnectedToServer;
-        // Add EventListeners
-        // -
-        yield break;
+    private void OnConnectedToServer()
+    {
+        ServerManager.Instance.OnConnectedToServer -= OnConnectedToServer;
+        SwitchPanelTo(UIPanelTypes.Lobby);
     }
 
-    private IEnumerator OpenLoadingMatch() {
-        // -
-        //_loadingMatchScreen.gameObject.SetActive(true);
-        yield break;
+    private void RemoveEventListeners()
+    {
+        for (int i = 0; i < _UIPanels.Length; i++)
+        {
+            _UIPanels[i].OpenUIPanelEvent -= SwitchPanelTo;
+        }
+        
     }
 
-    private IEnumerator OpenInventory() {
-        // -
-        //_inventoryScreen.gameObject.SetActive(true);
-        yield break;
+    /// <summary>
+    /// Disables all the UI Panels and enables the given one.
+    /// </summary>
+    /// <param name="panelType"></param>
+    private void SwitchPanelTo(UIPanelTypes panelType)
+    {
+        // Disable all menus, enable given panelType
+        for (int i = 0; i < _UIPanels.Length; i++)
+        {
+            if (_UIPanels[i].panelType == panelType)
+            {
+                _UIPanels[i].enabled = true;
+            }
+            else
+            {
+                _UIPanels[i].enabled = false;
+            }
+        }
     }
+    #endregion
 
 }

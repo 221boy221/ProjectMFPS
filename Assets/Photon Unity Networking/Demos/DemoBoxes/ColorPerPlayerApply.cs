@@ -1,6 +1,8 @@
 ﻿using Photon;
 using UnityEngine;
 
+using ExitGames.UtilityScripts;
+
 /// <summary>Sample script that uses ColorPerPlayer to apply it to an object's material color.</summary>
 public class ColorPerPlayerApply : PunBehaviour
 {
@@ -9,6 +11,44 @@ public class ColorPerPlayerApply : PunBehaviour
 
     // Cached, so we can apply color changes
     private Renderer rendererComponent;
+
+	// we need to reach the PlayerRoomindexing Component. So for safe initialization, we avoid having to mess with script execution order
+	bool isInitialized;
+	
+	void OnEnable()
+	{
+		if (!isInitialized)
+		{
+			Init();
+		}
+	}
+	
+	void Start()
+	{
+		if (!isInitialized)
+		{
+			Init();
+		}
+	}
+	
+	void Init()
+	{
+		if (!isInitialized && PlayerRoomIndexing.instance!=null)
+		{
+			PlayerRoomIndexing.instance.OnRoomIndexingChanged += ApplyColor;
+			isInitialized = true;
+		}
+	}
+	
+	
+	void OnDisable()
+	{
+		isInitialized = false;
+		if (PlayerRoomIndexing.instance!=null)
+		{
+			PlayerRoomIndexing.instance.OnRoomIndexingChanged -= ApplyColor;
+		}
+	}
 
 
     public void Awake()
@@ -39,16 +79,6 @@ public class ColorPerPlayerApply : PunBehaviour
     }
 
 
-    /// <summary>ColorPerPlayer stores colors in Custom Player Properties. When they change, we check and re-apply the color of objects.</summary>
-    /// <param name="playerAndUpdatedProps">Info about which properties changed.</param>
-    public override void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
-    {
-        // we could easily check if properties change for the owner of this photonView
-        // for simplicity of code, we just call ApplyColor()
-        this.ApplyColor();
-    }
-
-
     public void ApplyColor()
     {
         if (photonView.owner == null)
@@ -56,10 +86,12 @@ public class ColorPerPlayerApply : PunBehaviour
             return;
         }
 
-        if (photonView.owner.customProperties.ContainsKey(ColorPerPlayer.ColorProp))
-        {
-            int playersColorIndex = (int)photonView.owner.customProperties[ColorPerPlayer.ColorProp];
-            this.rendererComponent.material.color = colorPickerCache.Colors[playersColorIndex];
-        }
+		int _index = photonView.owner.GetRoomIndex();
+
+		if (_index>=0 && _index<=colorPickerCache.Colors.Length)
+		{
+			this.rendererComponent.material.color = colorPickerCache.Colors[_index];
+		}
+
     }
 }

@@ -1,102 +1,69 @@
 ﻿using UnityEngine;
-using System;
-using UnityEngine.Networking;
-using System.Collections;
 
-public class Player : MonoBehaviour {
+public class Player : MonoBehaviour
+{
+    #region Vars
 
     [SerializeField]
-    private Behaviour[] _disableOnDeath;
-    private bool[] _wasEnabled;
+    private PlayerRoles _role;
 
-    [SerializeField] private float _maxHealth = 100f;
-    private float m_Health;
-    private bool _isDead = false;
+    [SerializeField]
+    private MonoBehaviour[] _playerScripts;
+
+    [SerializeField]
+    private Transform _cameraTarget;
     
+    #endregion
 
-    private void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info) {
-        SerializeState(stream, info);
+    #region Methods
+    
+    private void Start()
+    {
+        PhotonView photonview = gameObject.GetComponent<PhotonView>();
+        SetActivePlayer(photonview.isMine);
     }
 
-    private void SerializeState(PhotonStream stream, PhotonMessageInfo info) {
-        if (stream.isWriting) {
-            stream.SendNext(m_Health);
+    public void SetActivePlayer(bool active)
+    {
+        if (active)
+        {
+            Camera.main.transform.SetParent(_cameraTarget, false);
+            Vector3 pos = Camera.main.transform.localPosition;
+            pos.x = pos.y = 0;
+            Camera.main.transform.localPosition = pos;
+            GUIMenu.Instance.SetRole(_role);
         }
-        else {
-            float oldHealth = m_Health;
-            m_Health = (float)stream.ReceiveNext();
-
-            if (m_Health != oldHealth) {
-                OnHealthChanged();
+        else
+        {
+            foreach (MonoBehaviour script in _playerScripts)
+            {
+                Destroy(script);
+            }
+            //Destroy(GetComponent<Rigidbody2D>());
+            Rigidbody2D rigid = GetComponent<Rigidbody2D>();
+            if (rigid != null)
+            {
+                rigid.gravityScale = 0f;
+            }
+            Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
+            foreach (Collider2D collider in colliders)
+            {
+                Destroy(collider);
             }
         }
     }
 
-    private void OnHealthChanged() {
-        throw new NotImplementedException();
-    }
+    #endregion
 
-    internal void Setup() {
-        _wasEnabled = new bool[_disableOnDeath.Length];
-        for (int i = 0; i < _wasEnabled.Length; i++) {
-            _wasEnabled[i] = _disableOnDeath[i].enabled;
+    #region Properties
+    
+    public PlayerRoles Role
+    {
+        get
+        {
+            return _role;
         }
-
-        SetDefaults();
     }
 
-    internal void SetDefaults() {
-        _isDead = false;
-        m_Health = _maxHealth;
-
-        // Re-enable all behaviours
-        for (int i = 0; i < _disableOnDeath.Length; i++) {
-            _disableOnDeath[i].enabled = _wasEnabled[i];
-        }
-
-        // Enable collider
-        Collider col = GetComponent<Collider>();
-        if(col != null)
-            col.enabled = true;
-    }
-
-    internal void RpcTakeDamage(float dmg) {
-        if (_isDead)
-            return;
-
-        m_Health -= dmg;
-
-        if (m_Health <= 0)
-            Die();
-    }
-
-    private void Die() {
-        _isDead = true;
-
-        // Disable Components
-        for (int i = 0; i < _disableOnDeath.Length; i++) {
-            _disableOnDeath[i].enabled = false;
-        }
-
-        // Disable collider
-        Collider col = GetComponent<Collider>();
-        if (col != null)
-            col.enabled = false;
-
-        Debug.Log(transform.name + " is DEAD!");
-
-        // Call respawn method
-        StartCoroutine(Respawn());
-    }
-
-    private IEnumerator Respawn() {
-
-        Debug.Log(transform.name + " respawned.");
-        yield break;
-    }
-
-    public bool IsDead {
-        get { return _isDead; }
-        protected set { _isDead = value; }
-    }
+    #endregion
 }

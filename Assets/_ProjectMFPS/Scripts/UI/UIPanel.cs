@@ -1,24 +1,40 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
-public abstract class UIPanel : MonoBehaviour {
+public class UIPanel : MonoBehaviour
+{
+    #region Vars
+    internal event UnityAction<UIPanelTypes> OpenUIPanelEvent = delegate { };
 
-    void Start()
+    protected RectTransform rectTransform;
+    [SerializeField] internal UIPanelTypes panelType;
+    #endregion
+
+    #region Methods
+    // Use this for initialization
+    void Awake ()
     {
-        UIManager.SwitchUIPanel += OnSwitchUIPanel;
-        
-        // todo: replace with UIManager calling inits of all panels
-        InitReferences();
+        rectTransform = this.GetComponent<RectTransform>();
+	}
+	
+    /// <summary>
+    /// Fires the OpenUIPanelEvent to which the UIManager listens in order to switch UI Panels.
+    /// </summary>
+    /// <param name="panel"></param>
+    protected void OpenUIPanel(UIPanelTypes panel) 
+    {
+        OpenUIPanelEvent(panel);
     }
 
-    //void OnEnable() { UIManager.SwitchUIPanel += OnSwitchUIPanel; }
-    void OnDisable() { UIManager.SwitchUIPanel -= OnSwitchUIPanel; }
-    void OnDestroy() { UIManager.SwitchUIPanel -= OnSwitchUIPanel; }
+    public virtual void Toggle(bool value)
+    {
+        SetListeners(value);
+    }
 
-    // EventHandler
-    internal abstract void OnSwitchUIPanel(ScreenPanel panel);
+    protected virtual void SetListeners(bool on)
+    {
 
-    // Override me
-    internal virtual void InitReferences() { }
-    internal virtual void Destroy() { }
+    }
 
+    #endregion
 }

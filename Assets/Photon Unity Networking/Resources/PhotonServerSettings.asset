@@ -11,16 +11,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f3758f8f58fdef43803eb9be1df0608, type: 3}
   m_Name: PhotonServerSettings
   m_EditorClassIdentifier: 
+  AppID: 140a671d-ec9a-41b7-aee2-57280bb7dc5e
+  VoiceAppID: 
+  ChatAppID: 
   HostType: 1
+  PreferredRegion: 0
+  EnabledRegions: -1
   Protocol: 0
   ServerAddress: 
   ServerPort: 5055
-  AppID: 140a671d-ec9a-41b7-aee2-57280bb7dc5e
-  VoiceAppID: 
-  PreferredRegion: 0
-  EnabledRegions: -1
+  VoiceServerPort: 5055
   JoinLobby: 0
   EnableLobbyStatistics: 1
+  PunLogging: 0
+  NetworkLogging: 1
+  RunInBackground: 1
   RpcList:
   - Chat
   - ColorRpc
@@ -38,4 +43,6 @@ MonoBehaviour:
   - RequestForPickupItems
   - RequestForPickupTimes
   - TaggedPlayer
+  - EndGame
+  - StartGame
   DisableAutoOpenWizard: 1
