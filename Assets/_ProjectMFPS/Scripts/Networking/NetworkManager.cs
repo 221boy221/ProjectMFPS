@@ -37,7 +37,7 @@ public class NetworkManager : Photon.PunBehaviour
     internal int AttemptLogin(string username, string password)
     {
         // Todo: Connect to database with said username and password.
-
+         
         // Return error codes by int value
         return 0;
     }

@@ -13,7 +13,6 @@ public class LobbyPanel : UIPanel
     public void OnJoinedRoom()
     {
         _centerPanel.OpenWaitingRoom();
-        _centerPanel.OpenChatRoom();
     }
 
     private void OnEnable()
@@ -21,6 +20,7 @@ public class LobbyPanel : UIPanel
         _centerPanel.gameObject.SetActive(true);
         _sidePanel.gameObject.SetActive(true);
         _centerPanel.OpenRoomList();
+        _centerPanel.OpenChatRoom();
     }
 
     private void OnDisable()

@@ -102,4 +102,9 @@ public class ServerManager : PunBehaviour
         OnConnectedToServer();
     }
 
+    public CloudRegionCode CurrentRegion
+    {
+        get { return _activeRegion; }
+    }
+
 }
