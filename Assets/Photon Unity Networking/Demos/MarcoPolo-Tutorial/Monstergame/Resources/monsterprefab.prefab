@@ -2491,7 +2491,6 @@ MonoBehaviour:
   group: 0
   OwnerShipWasTransfered: 0
   prefixBackup: -1
-  observed: {fileID: 0}
   synchronization: 2
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
@@ -2501,6 +2500,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1
+  currentMasterID: -1
   isRuntimeInstantiated: 0
 --- !u!114 &11400006
 MonoBehaviour:

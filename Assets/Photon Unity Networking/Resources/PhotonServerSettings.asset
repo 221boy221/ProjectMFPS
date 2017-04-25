@@ -13,7 +13,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AppID: 140a671d-ec9a-41b7-aee2-57280bb7dc5e
   VoiceAppID: 
-  ChatAppID: 
+  ChatAppID: eb2310ea-3f78-4397-8181-84ed90160b07
   HostType: 1
   PreferredRegion: 0
   EnabledRegions: -1

@@ -13,6 +13,7 @@ public class LobbyPanel : UIPanel
     public void OnJoinedRoom()
     {
         _centerPanel.OpenWaitingRoom();
+        _centerPanel.OpenChatRoom();
     }
 
     private void OnEnable()

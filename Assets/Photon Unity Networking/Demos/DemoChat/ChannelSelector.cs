@@ -15,6 +15,18 @@ public class ChannelSelector : MonoBehaviour, IPointerClickHandler
         t.text = this.Channel;        
     }
 
+    public void SetHighlight(bool on)
+    {
+        if (on)
+        {
+            this.GetComponent<Image>().color = Color.green;
+        }
+        else
+        {
+            this.GetComponent<Image>().color = Color.red;
+        }
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         ChatGui handler = FindObjectOfType<ChatGui>();

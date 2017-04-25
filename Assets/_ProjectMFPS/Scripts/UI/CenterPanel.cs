@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CenterPanel : MonoBehaviour
@@ -9,7 +10,8 @@ public class CenterPanel : MonoBehaviour
 
     [SerializeField] private RoomList _roomList;
     [SerializeField] private WaitingRoom _waitingRoom;
-    
+    [SerializeField] private GameObject _chatRoom;
+
 
     #endregion
 
@@ -26,6 +28,11 @@ public class CenterPanel : MonoBehaviour
         _roomList.Toggle(true);
         _waitingRoom.gameObject.SetActive(false);
         _waitingRoom.Toggle(false);
+    }
+
+    internal void OpenChatRoom()
+    {
+        _chatRoom.gameObject.SetActive(true);
     }
 
     public void OpenWaitingRoom()

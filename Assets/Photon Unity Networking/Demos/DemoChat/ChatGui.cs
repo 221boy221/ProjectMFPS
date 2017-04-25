@@ -23,41 +23,32 @@ using UnityEngine.UI;
 /// </remarks>
 public class ChatGui : MonoBehaviour, IChatClientListener
 {
-
+    
 	public string[] ChannelsToJoinOnConnect; // set in inspector. Demo channels to join automatically.
-	
 	public string[] FriendsList;
-	
 	public int HistoryLengthToFetch; // set in inspector. Up to a certain degree, previously sent messages can be fetched for context
-	
 	public string UserName { get; set; }
-	
 	private string selectedChannelName; // mainly used for GUI/input
 	
 	public ChatClient chatClient;
-	
 	public GameObject missingAppIdErrorPanel;
 	
-	public GameObject ConnectingLabel;
-	
 	public RectTransform ChatPanel;     // set in inspector (to enable/disable panel)
-	public GameObject UserIdFormPanel;
 	public InputField InputFieldChat;   // set in inspector
 	public Text CurrentChannelText;     // set in inspector
-	public Toggle ChannelToggleToInstantiate; // set in inspector
+	public GameObject friendlistSlotPrefab;
 	
-	
-	public GameObject FriendListUiItemtoInstantiate;
-	
-	private readonly Dictionary<string, Toggle> channelToggles = new Dictionary<string, Toggle>();
-	
-	private readonly Dictionary<string,FriendItem> friendListItemLUT =  new Dictionary<string, FriendItem>();
+    [SerializeField] private ChannelSelector[] _channels;
+	private readonly Dictionary<string, ChannelSelector> channelToggles = new Dictionary<string, ChannelSelector>();
+	private readonly Dictionary<string, FriendItem> friendListItemLUT =  new Dictionary<string, FriendItem>();
 	
 	public bool ShowState = true;
 	public GameObject Title;
-	public Text StateText; // set in inspector
-	public Text UserIdText; // set in inspector
-	
+
+    private ChannelSelector _currentChannel;
+
+
+
 	// private static string WelcomeText = "Welcome to chat. Type \\help to list commands.";
 	private static string HelpText = "\n    -- HELP --\n" +
 		"To subscribe to channel(s):\n" +
@@ -92,47 +83,38 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 			"\t<color=#E07B00>\\clear</color>";
 	
 	
-	public void Start()
+	public void Awake()
 	{
 		DontDestroyOnLoad(gameObject);
 
-
-		UserIdText.text = "";
-		StateText.text  = "";
-		StateText.gameObject.SetActive(true);
-		UserIdText.gameObject.SetActive(true);
+        for (int i = 0; i < _channels.Length; i++)
+        {
+            channelToggles.Add(i.ToString(), _channels[i]);
+        }
+        
 		Title.SetActive(true);
 		ChatPanel.gameObject.SetActive(false);
-		ConnectingLabel.SetActive(false);
-		
-		if (string.IsNullOrEmpty(UserName))
+
+        if (string.IsNullOrEmpty(UserName))
 		{
 			UserName = "user" + Environment.TickCount%99; //made-up username
 		}
 		
-		bool _AppIdPresent = string.IsNullOrEmpty(PhotonNetwork.PhotonServerSettings.ChatAppID);
-		this.missingAppIdErrorPanel.SetActive(_AppIdPresent);
-		
-		this.UserIdFormPanel.gameObject.SetActive(!_AppIdPresent);
-		
 		if (string.IsNullOrEmpty(PhotonNetwork.PhotonServerSettings.ChatAppID))
 		{
+		    this.missingAppIdErrorPanel.SetActive(true);
 			Debug.LogError("You need to set the chat app ID in the PhotonServerSettings file in order to continue.");
 			return;
 		}
 	}
 	
 	public void Connect()
-	{
-		this.UserIdFormPanel.gameObject.SetActive(false);
-		
+	{	
 		this.chatClient = new ChatClient(this);
 		this.chatClient.Connect(PhotonNetwork.PhotonServerSettings.ChatAppID, "1.0", new ExitGames.Client.Photon.Chat.AuthenticationValues(UserName));
 		
-		this.ChannelToggleToInstantiate.gameObject.SetActive(false);
 		Debug.Log("Connecting as: " + UserName);
 		
-		ConnectingLabel.SetActive(true);
 	}
 	
 	/// <summary>To avoid that the Editor becomes unresponsive, disconnect all Photon connections in OnApplicationQuit.</summary>
@@ -151,14 +133,6 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 			this.chatClient.Service(); // make sure to call this regularly! it limits effort internally, so calling often is ok!
 		}
 		
-		// check if we are missing context, which means we got kicked out to get back to the Photon Demo hub.
-		if ( this.StateText == null)
-		{
-			Destroy(this.gameObject);
-			return;
-		}
-		
-		this.StateText.gameObject.SetActive(ShowState); // this could be handled more elegantly, but for the demo it's ok.
 	}
 	
 	
@@ -334,48 +308,54 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 			this.chatClient.Subscribe(this.ChannelsToJoinOnConnect, this.HistoryLengthToFetch);
 		}
 		
-		ConnectingLabel.SetActive(false);
-		
-		UserIdText.text = "Connected as "+ this.UserName;
-		
 		this.ChatPanel.gameObject.SetActive(true);
-		
-		if (FriendsList!=null  && FriendsList.Length>0)
-		{
-			this.chatClient.AddFriends(FriendsList); // Add some users to the server-list to get their status updates
-			
-			// add to the UI as well
-			foreach(string _friend in FriendsList)
-			{
-				if (this.FriendListUiItemtoInstantiate != null && _friend!= this.UserName)
-				{
-					this.InstantiateFriendButton(_friend);
-				}
-				
-			}
-			
-		}
-		
-		if (this.FriendListUiItemtoInstantiate != null)
-		{
-			this.FriendListUiItemtoInstantiate.SetActive(false);
-		}
-		
-		
-		this.chatClient.SetOnlineStatus(ChatUserStatus.Online); // You can set your online state (without a mesage).
+
+        LoadFriendList();
+
+        this.chatClient.SetOnlineStatus(ChatUserStatus.Online); // You can set your online state (without a mesage).
 	}
 	
 	public void OnDisconnected()
 	{
-		ConnectingLabel.SetActive(false);
+		// -
 	}
+
+    private void LoadFriendList()
+    {
+        if (FriendsList != null && FriendsList.Length > 0)
+        {
+            this.chatClient.AddFriends(FriendsList); // Add some users to the server-list to get their status updates
+
+            // add to the UI as well
+            foreach (string _friend in FriendsList)
+            {
+                if (this.friendlistSlotPrefab != null && _friend != this.UserName)
+                {
+                    this.AddFriendSlot(_friend);
+                }
+
+            }
+
+        }
+
+        if (this.friendlistSlotPrefab != null)
+        {
+            this.friendlistSlotPrefab.SetActive(false);
+        }
+    }
+
+    private void AddFriendSlot(string friendName)
+    {
+        // Todo: Instantiate slot and fill with data
+        // Optional: add FriendSlot class
+    }
 	
 	public void OnChatStateChange(ChatState state)
 	{
 		// use OnConnected() and OnDisconnected()
 		// this method might become more useful in the future, when more complex states are being used.
 		
-		this.StateText.text = state.ToString();
+		//this.StateText.text = state.ToString();
 	}
 	
 	public void OnSubscribed(string[] channels, bool[] results)
@@ -384,12 +364,6 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 		foreach (string channel in channels)
 		{
 			this.chatClient.PublishMessage(channel, "says 'hi'."); // you don't HAVE to send a msg on join but you could.
-			
-			if (this.ChannelToggleToInstantiate != null)
-			{
-				this.InstantiateChannelButton(channel);
-				
-			}
 		}
 		
 		Debug.Log("OnSubscribed: " + string.Join(", ", channels));
@@ -417,66 +391,11 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 		// Switch to the first newly created channel
 		ShowChannel(channels[0]);
 	}
-	
-	private void InstantiateChannelButton(string channelName)
-	{
-		if (this.channelToggles.ContainsKey(channelName))
-		{
-			Debug.Log("Skipping creation for an existing channel toggle.");
-			return;
-		}
-		
-		Toggle cbtn = (Toggle)GameObject.Instantiate(this.ChannelToggleToInstantiate);
-		cbtn.gameObject.SetActive(true);
-		cbtn.GetComponentInChildren<ChannelSelector>().SetChannel(channelName);
-		cbtn.transform.SetParent(this.ChannelToggleToInstantiate.transform.parent, false);
-		
-		this.channelToggles.Add(channelName, cbtn);
-	}
-	
-	private void InstantiateFriendButton(string friendId)
-	{
-		GameObject fbtn = (GameObject)GameObject.Instantiate(this.FriendListUiItemtoInstantiate);
-		fbtn.gameObject.SetActive(true);
-		FriendItem  _friendItem =	fbtn.GetComponent<FriendItem>();
-		
-		_friendItem.FriendId = friendId;
-		
-		fbtn.transform.SetParent(this.FriendListUiItemtoInstantiate.transform.parent, false);
-		
-		this.friendListItemLUT[friendId] = _friendItem;
-	}
-	
-	
+
+
 	public void OnUnsubscribed(string[] channels)
 	{
-		foreach (string channelName in channels)
-		{
-			if (this.channelToggles.ContainsKey(channelName))
-			{
-				Toggle t = this.channelToggles[channelName];
-				Destroy(t.gameObject);
-				
-				this.channelToggles.Remove(channelName);
-				
-				Debug.Log("Unsubscribed from channel '" + channelName + "'.");
-				
-				// Showing another channel if the active channel is the one we unsubscribed from before
-				if (channelName == selectedChannelName && channelToggles.Count > 0)
-				{
-					IEnumerator<KeyValuePair<string, Toggle>> firstEntry = channelToggles.GetEnumerator();
-					firstEntry.MoveNext();
-					
-					ShowChannel(firstEntry.Current.Key);
-					
-					firstEntry.Current.Value.isOn = true;
-				}
-			}
-			else
-			{
-				Debug.Log("Can't unsubscribe from channel '" + channelName + "' because you are currently not subscribed to it.");
-			}
-		}
+		
 	}
 	
 	public void OnGetMessages(string channelName, string[] senders, object[] messages)
@@ -492,7 +411,6 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 	{
 		// as the ChatClient is buffering the messages for you, this GUI doesn't need to do anything here
 		// you also get messages that you sent yourself. in that case, the channelName is determinded by the target of your msg
-		this.InstantiateChannelButton(channelName);
 		
 		byte[] msgBytes = message as byte[];
 		if (msgBytes != null)
@@ -559,13 +477,10 @@ public class ChatGui : MonoBehaviour, IChatClientListener
 		}
 		
 		this.selectedChannelName = channelName;
-		this.CurrentChannelText.text = channel.ToStringMessages();
-		Debug.Log("ShowChannel: " + this.selectedChannelName);
-		
-		foreach (KeyValuePair<string, Toggle> pair in channelToggles)
-		{
-			pair.Value.isOn = pair.Key == channelName ? true : false;
-		}
+
+        _currentChannel.SetHighlight(true);
+
+        Debug.Log("ShowChannel: " + this.selectedChannelName);
 	}
 	
 	public void OpenDashboard()

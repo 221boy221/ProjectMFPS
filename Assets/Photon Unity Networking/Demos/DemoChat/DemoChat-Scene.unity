@@ -786,17 +786,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02d148d0890b2d44dbdf7f1c1b39a499, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChatAppId: 
   ChannelsToJoinOnConnect:
   - Region
   - Guild
+  FriendsList:
+  - Joe
+  - Jane
+  - Bob
   HistoryLengthToFetch: 0
+  missingAppIdErrorPanel: {fileID: 1860384066}
+  ConnectingLabel: {fileID: 1323013538}
   ChatPanel: {fileID: 1507568401}
+  UserIdFormPanel: {fileID: 814826291}
   InputFieldChat: {fileID: 1989416850}
   CurrentChannelText: {fileID: 1641022483}
   ChannelToggleToInstantiate: {fileID: 342400385}
+  FriendListUiItemtoInstantiate: {fileID: 328181930}
   ShowState: 1
+  Title: {fileID: 938244445}
   StateText: {fileID: 2126670842}
+  UserIdText: {fileID: 162519642}
   TestLength: 2048
 --- !u!114 &192561279
 MonoBehaviour:
@@ -810,8 +819,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chatNewComponent: {fileID: 192561278}
-  AppIdInputPanel: {fileID: 0}
-  NameInputPanel: {fileID: 0}
   idInput: {fileID: 1320934697}
 --- !u!1 &193452638
 GameObject:
@@ -1856,26 +1863,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   toggle: {fileID: 342400385}
-  NormalOnColor:
-    r: 0
-    g: 0
-    b: 0
-    a: 1
-  NormalOffColor:
-    r: 1
-    g: 1
-    b: 1
-    a: 1
-  HoverOnColor:
-    r: 0
-    g: 0
-    b: 0
-    a: 1
-  HoverOffColor:
-    r: 0
-    g: 0
-    b: 0
-    a: 1
+  NormalOnColor: {r: 0, g: 0, b: 0, a: 1}
+  NormalOffColor: {r: 1, g: 1, b: 1, a: 1}
+  HoverOnColor: {r: 0, g: 0, b: 0, a: 1}
+  HoverOffColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1001 &418573286
 Prefab:
   m_ObjectHideFlags: 0

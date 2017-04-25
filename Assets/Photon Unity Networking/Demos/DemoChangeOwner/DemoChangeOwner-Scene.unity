@@ -670,7 +670,6 @@ MonoBehaviour:
   group: 0
   OwnerShipWasTransfered: 0
   prefixBackup: -1
-  observed: {fileID: 1245954011}
   synchronization: 3
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
@@ -680,6 +679,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 1
   instantiationId: 1
+  currentMasterID: -1
   isRuntimeInstantiated: 0
 --- !u!23 &1245954008
 MeshRenderer:
@@ -745,7 +745,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1245954012
 MonoBehaviour:
@@ -792,7 +792,7 @@ Transform:
   m_Children:
   - {fileID: 1303203956}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &1277725635
 MeshRenderer:
@@ -1055,7 +1055,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &1466142481
 Camera:
@@ -1184,6 +1184,8 @@ GameObject:
   - component: {fileID: 1664540818}
   - component: {fileID: 1664540822}
   - component: {fileID: 1664540820}
+  - component: {fileID: 1664540821}
+  - component: {fileID: 1664540819}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -1217,6 +1219,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AutoConnect: 1
   Version: 6
+--- !u!114 &1664540819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1664540816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5a097d1ab84b464395a16e9a7bb35b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1664540820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1228,6 +1241,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e70318fb95df612418c6f2f462f9b016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1664540821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1664540816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22363507b0aff554ba53c98e8a40ff7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Colors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  ShowColorLabel: 0
+  ColorLabelArea:
+    serializedVersion: 2
+    x: 0
+    y: 50
+    width: 100
+    height: 200
+  img: {fileID: 0}
+  MyColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!114 &1664540822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1256,15 +1294,16 @@ MonoBehaviour:
   group: 0
   OwnerShipWasTransfered: 0
   prefixBackup: -1
-  observed: {fileID: 0}
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
   ownershipTransfer: 0
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 0}
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 2
   instantiationId: 2
+  currentMasterID: -1
   isRuntimeInstantiated: 0
 --- !u!1 &1799231921
 GameObject:

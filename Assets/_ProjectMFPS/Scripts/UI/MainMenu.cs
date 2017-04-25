@@ -31,7 +31,10 @@ public class MainMenu : UIPanel
         _settingsButton.onClick.RemoveAllListeners();
         _quitButton.onClick.RemoveAllListeners();
 
-        _serverList.gameObject.SetActive(false);
+        if (_serverList.gameObject != null || _serverList.gameObject.activeInHierarchy)
+        {
+            _serverList.gameObject.SetActive(false);
+        }
     }
 
 
